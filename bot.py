@@ -39,7 +39,16 @@ async def post_shutdown(application):
     logger.info("Scheduler stopped")
 
 
-def run_bot():
+def run_flask():
+    port = int(os.environ.get("PORT", 5000))
+    logger.info(f"Starting web server on port {port}")
+    app.run(host="0.0.0.0", port=port)
+
+
+def main():
+    flask_thread = threading.Thread(target=run_flask, daemon=True)
+    flask_thread.start()
+
     bot_app = (
         ApplicationBuilder()
         .token(BOT_TOKEN)
@@ -55,23 +64,7 @@ def run_bot():
     start_scheduler()
     logger.info("Bot starting...")
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_until_complete(
-            bot_app.run_polling(allowed_updates=["message", "callback_query"])
-        )
-    finally:
-        loop.close()
-
-
-def main():
-    bot_thread = threading.Thread(target=run_bot, daemon=True)
-    bot_thread.start()
-
-    port = int(os.environ.get("PORT", 5000))
-    logger.info(f"Starting web server on port {port}")
-    app.run(host="0.0.0.0", port=port)
+    bot_app.run_polling(allowed_updates=["message", "callback_query"])
 
 
 if __name__ == "__main__":
