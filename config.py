@@ -1,15 +1,18 @@
 import os
 from datetime import date
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "6603511642:AAGO52G65uKqZ08K7SkQONHVlhCiqhtCRQE")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY", "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")
+NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
 NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 NVIDIA_MODEL = "meta/llama-3.1-70b-instruct"
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "bot_data.db")
 
-DEADLINE = date(2025, 8, 21)
+_deadline_str = os.getenv("DEADLINE", "2026-08-21")
+DEADLINE = date.fromisoformat(_deadline_str)
+
+TIMEZONE = os.getenv("TIMEZONE", "Europe/Minsk")
 
 DAILY_TASKS = [
     {

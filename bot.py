@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import threading
 import os
@@ -5,7 +6,7 @@ from flask import Flask
 from telegram.ext import ApplicationBuilder
 from config import BOT_TOKEN
 from handlers import get_handlers
-from scheduler import start_scheduler, stop_scheduler, set_application
+from scheduler import start_scheduler, stop_scheduler, set_application, restore_user
 import database as db
 
 logging.basicConfig(
@@ -29,7 +30,8 @@ def health_check():
 
 async def post_init(application):
     db.init_db()
-    logger.info("Database initialized")
+    restore_user()
+    logger.info("Database initialized, user restored")
 
 
 async def post_shutdown(application):
@@ -52,7 +54,15 @@ def run_bot():
     set_application(bot_app)
     start_scheduler()
     logger.info("Bot starting...")
-    bot_app.run_polling(allowed_updates=["message", "callback_query"])
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(
+            bot_app.run_polling(allowed_updates=["message", "callback_query"])
+        )
+    finally:
+        loop.close()
 
 
 def main():

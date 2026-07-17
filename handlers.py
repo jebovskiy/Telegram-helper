@@ -19,8 +19,10 @@ WAITING_WRITE_MSG = 4
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
+    user = update.effective_user
+    user_id = user.id
     set_user(user_id)
+    db.save_user(user_id, user.username, user.first_name)
     db.init_db()
 
     reply_keyboard = [

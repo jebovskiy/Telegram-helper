@@ -39,6 +39,15 @@ def init_db():
         )
     """)
 
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY,
+            username TEXT,
+            first_name TEXT,
+            registered_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -150,3 +159,23 @@ def get_adjustment(user_id: int, adj_date: date):
     row = c.fetchone()
     conn.close()
     return dict(row) if row else None
+
+
+def save_user(user_id: int, username: str = "", first_name: str = ""):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("""
+        INSERT OR REPLACE INTO users (user_id, username, first_name)
+        VALUES (?, ?, ?)
+    """, (user_id, username or "", first_name or ""))
+    conn.commit()
+    conn.close()
+
+
+def get_registered_user():
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT user_id FROM users ORDER BY registered_at DESC LIMIT 1")
+    row = c.fetchone()
+    conn.close()
+    return row["user_id"] if row else None
